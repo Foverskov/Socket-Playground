@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>      // For memset()
 #include <sys/socket.h> // For socket functions
+#include <arpa/inet.h>
 #include <netinet/in.h> // For sockaddr_in structure
 #include <unistd.h>     // For close() function
 
@@ -23,7 +24,7 @@ int main(){
 
     // Configure Addresses
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
     address.sin_port = htons(5000);
 
     // Bind the Socket
@@ -41,9 +42,9 @@ int main(){
     send(new_socket, hello, strlen(hello), 0);
     std::cout << "Hello message sent" << std::endl;
 
-    char buffer[1024] = {0};
-    int valread = recv(new_socket, buffer, 1024, 0);
-    std::cout << "Message received: " << buffer << std::endl;
+    // char buffer[1024] = {0};
+    // int valread = recv(new_socket, buffer, 1024, 0);
+    // std::cout << "Message received: " << buffer << std::endl;
 
     // Close the sockets 
     close(new_socket);
