@@ -1,0 +1,4 @@
+# Playground for internet protocols, sockets and threads
+## Notes
+TCP is a connection-oriented protocol, which means that a connection must be established before data can be sent. This is done using a three-way handshake. The client sends a SYN packet to the server, the server responds with a SYN-ACK packet, and the client sends an ACK packet back to the server. Once the connection is established, data can be sent in both directions.
+UDP is a connectionless protocol, which means that data can be sent without establishing a connection. This makes it faster than TCP, but also less reliable. UDP does not guarantee that packets will arrive in order or that they will arrive at all. It is up to the application to handle any errors that may occur.
