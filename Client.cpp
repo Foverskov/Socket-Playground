@@ -19,7 +19,19 @@ int main(){
     // Configure Addresses
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server_address.sin_port = htons(5000);
+    server_address.sin_port = htons(8080);
+
+    // if (bind(socket_fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
+    //     std::cerr << "Bind failed" << std::endl;
+    //     close(socket_fd);
+    //     return -1;
+    // }
+
+    // if (listen(socket_fd, 3) < 0) {
+    //     std::cerr << "Listen failed" << std::endl;
+    //     close(socket_fd);
+    //     return -1;
+    // }
 
     if(connect(socket_fd,(struct sockaddr*)&server_address,sizeof(server_address))<0){
         std::cerr << "Failed connection"<<std::endl;

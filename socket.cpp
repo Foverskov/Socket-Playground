@@ -18,6 +18,7 @@ int main(){
         std::cerr << "Socket creation failed" << std::endl;
         return -1;
     }
+    std::cout<<"Socket Created with fd: " << server_fd << std::endl;
 
     // Set socket 
     setsockopt(server_fd,SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,&opt,sizeof(opt));
@@ -25,7 +26,7 @@ int main(){
     // Configure Addresses
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr("127.0.0.1");
-    address.sin_port = htons(5000);
+    address.sin_port = htons(8080);
 
     // Bind the Socket
     bind(server_fd,(struct sockaddr *)&address, sizeof(address));
@@ -34,8 +35,19 @@ int main(){
     listen(server_fd,3);
 
     // Accept a Connection
-    new_socket = accept(server_fd, (struct sockaddr *)&address,(socklen_t*)&addrlen);
+    std::cout << "Waiting for connections..." << std::endl;
+    new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+    if (new_socket < 0) {
+        std::cerr << "Connection accept failed" << std::endl;
+        close(server_fd);
+        return -1;
+    }
 
+    // Get client information
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &address.sin_addr, client_ip, INET_ADDRSTRLEN);
+    std::cout << "Connection established with client " << client_ip 
+              << ":" << ntohs(address.sin_port) << std::endl;
 
     // Send and receive data
     const char *hello = "Hello from server";
