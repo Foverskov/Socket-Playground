@@ -4,7 +4,44 @@
 #include <netinet/in.h> // For sockaddr_in structure
 #include <arpa/inet.h>
 #include <unistd.h>     // For close() function
+#include <fstream>
 
+void receiveFile(int socket_fd, const std::string& saveFilePath){
+    // Receive file size
+    size_t fileSize = 0; 
+    recv(socket_fd,&fileSize,sizeof(fileSize),0);
+    std::cout << "receiving file of size: " << fileSize<< std::endl;
+
+    //open file for writing 
+    std::ofstream file(saveFilePath,std::ios::binary);
+    if (!file){
+        std::cerr << "Didnt open write file"<< std::endl;
+        return;
+    }
+
+    // Init buffer the received data
+    size_t buffersize = 4096;
+    std::vector<char> buffer(buffersize);
+
+    // Receive file chunks
+    size_t totalReceived = 0; 
+    while (totalReceived < fileSize){
+        size_t bytesToReceive = std::min(buffersize,fileSize-totalReceived);
+        size_t bytesReceived = 0; 
+        while (bytesReceived < bytesToReceive){
+            size_t result = recv(socket_fd,buffer.data()+bytesReceived,bytesToReceive-bytesReceived,0);
+            if (result < 0){
+                std::cerr << "Error receiving file chunks" << std::endl;
+                return;
+            }
+            bytesReceived += result;
+        }
+        file.write(buffer.data(),bytesReceived);
+        totalReceived += bytesReceived;
+        std::cout << "Progress: " << totalReceived << "/" << fileSize << std::endl;
+    }
+    std::cout << "File received " << std::endl;
+}   
 
 int main(){
     int socket_fd = socket(AF_INET,SOCK_STREAM,0); 
@@ -21,27 +58,16 @@ int main(){
     server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
     server_address.sin_port = htons(8080);
 
-    // if (bind(socket_fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
-    //     std::cerr << "Bind failed" << std::endl;
-    //     close(socket_fd);
-    //     return -1;
-    // }
-
-    // if (listen(socket_fd, 3) < 0) {
-    //     std::cerr << "Listen failed" << std::endl;
-    //     close(socket_fd);
-    //     return -1;
-    // }
-
     if(connect(socket_fd,(struct sockaddr*)&server_address,sizeof(server_address))<0){
         std::cerr << "Failed connection"<<std::endl;
         return -1;
     }
 
-    char buffer[1024] = {0};
-    int valread = recv(socket_fd, buffer, 1024, 0);
-    std::cout << "Message received: " << buffer << std::endl;
+    // char buffer[1024] = {0};
+    // int valread = recv(socket_fd, buffer, 1024, 0);
+    // std::cout << "Message received: " << buffer << std::endl;
 
+    receiveFile(socket_fd,"/Users/foverskov/Documents/github/2_SoftwareAAU/IWP/TCPsocket/FstProject/recieve.mov");
     // const char *hello = "Hello from server";
     // send(socket_fd, hello, strlen(hello), 0);
     // std::cout << "Hello message sent" << std::endl;
@@ -49,3 +75,4 @@ int main(){
     close(socket_fd);
     return 0; 
 }
+

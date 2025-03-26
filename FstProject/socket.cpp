@@ -4,7 +4,45 @@
 #include <arpa/inet.h>
 #include <netinet/in.h> // For sockaddr_in structure
 #include <unistd.h>     // For close() function
+#include <fstream>
+#include <vector>
 
+void sendFile(int socket_fd, const std::string& filepath){
+    std::ifstream file(filepath, std::ios::binary);
+    if(!file){
+        std::cerr <<"File not opened: " << filepath << std::endl;
+        return;
+    }
+
+    file.seekg(0,std::ios::end);
+    size_t fileSize = file.tellg();
+    file.seekg(0,std::ios::beg);
+
+    send(socket_fd,&fileSize,sizeof(fileSize),0);
+
+    const size_t buffersize = 4096;
+    std::vector<char> buffer(buffersize);
+
+    size_t totalSent = 0; 
+    while (totalSent < fileSize){
+        size_t bytesToRead = std::min(buffersize,fileSize - totalSent);
+        file.read(buffer.data(),bytesToRead);
+        size_t bytesRead = file.gcount();
+
+        size_t bytesSent = 0; 
+        while(bytesSent < bytesRead){
+            ssize_t result = send(socket_fd,buffer.data(),bytesRead-bytesSent,0);
+            if (result<0){
+                std::cerr << "Failed sending packet" << std::endl;
+                return;
+            }
+            bytesSent += result;
+        }
+        totalSent += bytesRead;
+        std::cout << "Progress: " << totalSent << std::endl;
+    }   
+    std::cout << "file sent succes" << std::endl;
+}
 
 int main(){
     int server_fd, new_socket;
@@ -50,9 +88,11 @@ int main(){
               << ":" << ntohs(address.sin_port) << std::endl;
 
     // Send and receive data
-    const char *hello = "Hello from server";
-    send(new_socket, hello, strlen(hello), 0);
-    std::cout << "Hello message sent" << std::endl;
+    // const char *hello = "Hello from server";
+    // send(new_socket, hello, strlen(hello), 0);
+    // std::cout << "Hello message sent" << std::endl;
+
+    sendFile(new_socket,"/Users/foverskov/Desktop/IMG_0245.mov");
 
     // char buffer[1024] = {0};
     // int valread = recv(new_socket, buffer, 1024, 0);
@@ -64,3 +104,4 @@ int main(){
 
     return 0; 
 }
+
