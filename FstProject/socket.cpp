@@ -40,7 +40,7 @@ void sendFile(int socket_fd, const std::string& filepath){
     std::vector<char> fileData(fileSize);
     file.read(fileData.data(),fileSize);
 
-    std::vector<char> compressed()
+    std::vector<char> compressed();
 
     send(socket_fd,&fileSize,sizeof(fileSize),0);
 
