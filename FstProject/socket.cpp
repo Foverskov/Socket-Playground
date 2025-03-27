@@ -7,6 +7,25 @@
 #include <fstream>
 #include <vector>
 
+std::vector<char> compressRLE(const std::vector<char>& data){
+    std::vector<char> compressed;
+    size_t i = 0;
+    
+    while (i < data.size()) {
+        char current = data[i];
+        unsigned char count = 1;
+        
+        while (i + 1 < data.size() && data[i + 1] == current && count < 255) {
+            count++;
+            i++;
+        }
+        compressed.push_back(count);
+        compressed.push_back(current);
+        i++;
+    }
+    return compressed;
+}
+
 void sendFile(int socket_fd, const std::string& filepath){
     std::ifstream file(filepath, std::ios::binary);
     if(!file){
@@ -17,6 +36,11 @@ void sendFile(int socket_fd, const std::string& filepath){
     file.seekg(0,std::ios::end);
     size_t fileSize = file.tellg();
     file.seekg(0,std::ios::beg);
+
+    std::vector<char> fileData(fileSize);
+    file.read(fileData.data(),fileSize);
+
+    std::vector<char> compressed()
 
     send(socket_fd,&fileSize,sizeof(fileSize),0);
 

@@ -6,6 +6,22 @@
 #include <unistd.h>     // For close() function
 #include <fstream>
 
+std::vector<char> decompressRLE(const std::vector<char>& compressed) {
+    std::vector<char> decompressed;
+    
+    for (size_t i = 0; i < compressed.size(); i += 2) {
+        if (i + 1 >= compressed.size()) break;
+        
+        unsigned char count = compressed[i];
+        char value = compressed[i + 1];
+        
+        for (unsigned char j = 0; j < count; j++) {
+            decompressed.push_back(value);
+        }
+    }
+    return decompressed;
+}
+
 void receiveFile(int socket_fd, const std::string& saveFilePath){
     // Receive file size
     size_t fileSize = 0; 
@@ -63,15 +79,8 @@ int main(){
         return -1;
     }
 
-    // char buffer[1024] = {0};
-    // int valread = recv(socket_fd, buffer, 1024, 0);
-    // std::cout << "Message received: " << buffer << std::endl;
-
     receiveFile(socket_fd,"/Users/foverskov/Documents/github/2_SoftwareAAU/IWP/TCPsocket/FstProject/recieve.mov");
-    // const char *hello = "Hello from server";
-    // send(socket_fd, hello, strlen(hello), 0);
-    // std::cout << "Hello message sent" << std::endl;
-
+    
     close(socket_fd);
     return 0; 
 }
